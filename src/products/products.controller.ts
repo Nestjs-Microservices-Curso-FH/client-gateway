@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -13,10 +13,11 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { catchError } from 'rxjs';
 import { PaginationDto } from 'src/common';
 import { PRODUCT_SERVICE } from 'src/config';
+import { CreateProductDto, UpdateProductDto } from './dto';
 
 @Controller('products')
 export class ProductsController {
@@ -25,8 +26,14 @@ export class ProductsController {
   ) {}
 
   @Post()
-  createProduct(@Body() createProducto: any) {
-    return `Crear producto`;
+  createProduct(@Body() createProducto: CreateProductDto) {
+    return this.productsClient
+      .send({ cmd: 'create_product' }, createProducto)
+      .pipe(
+        catchError((err) => {
+          throw new RpcException(err);
+        }),
+      );
   }
 
   @Get()
@@ -35,31 +42,46 @@ export class ProductsController {
   }
 
   @Get(':id')
-  async findOneProduct(@Param('id', ParseIntPipe) id: number) {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const product = await firstValueFrom(
-        this.productsClient.send({ cmd: 'find_one_product' }, { id }),
-      );
+  findOneProduct(@Param('id', ParseIntPipe) id: number) {
+    return this.productsClient.send({ cmd: 'find_one_product' }, { id }).pipe(
+      catchError((err) => {
+        throw new RpcException(err);
+      }),
+    );
 
-      return product;
-    } catch (error) {
-      throw new BadRequestException(error);
-    }
+    // Forma Entendible
+    // try {
+    //   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    //   const product = await firstValueFrom(
+    //     this.productsClient.send({ cmd: 'find_one_product' }, { id }),
+    //   );
+    //   return product;
+    // } catch (error) {
+    //   throw new RpcException(error);
+    // }
   }
 
   @Patch(':id')
   updateProduct(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateProduct: any,
+    @Body() updateProduct: UpdateProductDto,
   ) {
-    console.log({ ...updateProduct });
-    return `Actualizar Producto ${id}`;
+    return this.productsClient
+      .send({ cmd: 'update_product' }, { ...updateProduct, id })
+      .pipe(
+        catchError((err) => {
+          throw new RpcException(err);
+        }),
+      );
   }
 
   @Delete(':id')
   removeProduct(@Param('id', ParseIntPipe) id: number) {
-    return `Remove Producto Id: ${id}`;
+    return this.productsClient.send({ cmd: 'remove_product' }, { id }).pipe(
+      catchError((err) => {
+        throw new RpcException(err);
+      }),
+    );
   }
 
   @Post('seed')

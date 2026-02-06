@@ -32,5 +32,5 @@ export const envs = {
   PORT: envVars.PORT,
   NODE_ENV: envVars.NODE_ENV,
   productMsHost: envVars.PRODUCT_MICROSERVICE_HOST,
-  productMsPort: +envVars.PRODUCT_MICROSERVICE_PORT,
+  productMsPort: envVars.PRODUCT_MICROSERVICE_PORT,
 };
