@@ -9,14 +9,21 @@ interface IEnvVars {
   NODE_ENV: string;
   PRODUCT_MICROSERVICE_HOST: string;
   PRODUCT_MICROSERVICE_PORT: number;
+
+  ORDER_MICROSERVICE_HOST: string;
+  ORDER_MICROSERVICE_PORT: number;
 }
 
 const envsSchema = joi
   .object({
     PORT: joi.number().required(),
     NODE_ENV: joi.string().required(),
+
     PRODUCT_MICROSERVICE_HOST: joi.string().required(),
     PRODUCT_MICROSERVICE_PORT: joi.number().required(),
+
+    ORDER_MICROSERVICE_HOST: joi.string().required(),
+    ORDER_MICROSERVICE_PORT: joi.number().required(),
   })
   .unknown(true);
 
@@ -31,6 +38,10 @@ const envVars: IEnvVars = value;
 export const envs = {
   PORT: envVars.PORT,
   NODE_ENV: envVars.NODE_ENV,
+
   productMsHost: envVars.PRODUCT_MICROSERVICE_HOST,
   productMsPort: envVars.PRODUCT_MICROSERVICE_PORT,
+
+  orderMsHost: envVars.ORDER_MICROSERVICE_HOST,
+  orderMsPort: envVars.ORDER_MICROSERVICE_PORT,
 };
